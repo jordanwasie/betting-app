@@ -1,88 +1,99 @@
-require('dotenv').config();
 const express = require('express');
-const pool = require('./db');
+const axios = require('axios');
+const path = require('path');
+const db = require('./db');
 
 const app = express();
+const PORT = process.env.PORT || 10000;
+
+// Middleware
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 1. የፊት ገፅ (Frontend) ፋይሎችን ለማስተናገድ
-app.use(express.static('public'));
+// API Key Config
+const ODDS_API_KEY = '8bcec2249c795c2c5e6638230386b274';
 
-// 2. Health Check API (ሰርቨሩ እና ዳታቤዙ መስራታቸውን ለማረጋገጥ)
-app.get('/api/health', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ success: true, db_time: result.rows[0].now });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// 3. የጨዋታዎችን ዝርዝር ከዳታቤዝ የሚያመጣ API
+// 1. Get Live Matches & Odds from The Odds API
 app.get('/api/matches', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM matches WHERE is_active = true');
-    res.json({ success: true, matches: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+    try {
+        const response = await axios.get('https://api.the-odds-api.com/v4/sports/soccer_epl/odds/', {
+            params: {
+                apiKey: ODDS_API_KEY,
+                regions: 'uk',
+                markets: 'h2h',
+                oddsFormat: 'decimal'
+            }
+        });
 
-// 4. የተጠቃሚውን የገንዘብ መጠን (Wallet Balance) የሚያመጣ API
-app.get('/api/user/:id', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT id, username, wallet_balance FROM users WHERE id = $1', [req.params.id]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+        // Format data for our frontend
+        const matches = response.data.map(match => {
+            const bookmaker = match.bookmakers[0];
+            const market = bookmaker ? bookmaker.markets.find(m => m.key === 'h2h') : null;
+            
+            let homeOdds = 2.10, drawOdds = 3.20, awayOdds = 2.80;
+
+            if (market && market.outcomes) {
+                const homeOutcome = market.outcomes.find(o => o.name === match.home_team);
+                const awayOutcome = market.outcomes.find(o => o.name === match.away_team);
+                const drawOutcome = market.outcomes.find(o => o.name === 'Draw');
+
+                if (homeOutcome) homeOdds = homeOutcome.price;
+                if (awayOutcome) awayOdds = awayOutcome.price;
+                if (drawOutcome) drawOdds = drawOutcome.price;
+            }
+
+            return {
+                id: match.id,
+                home_team: match.home_team,
+                away_team: match.away_team,
+                commence_time: match.commence_time,
+                home_odds: homeOdds,
+                draw_odds: drawOdds,
+                away_odds: awayOdds
+            };
+        });
+
+        res.json(matches);
+    } catch (error) {
+        console.error('Error fetching live sports data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch live matches' });
     }
-    res.json({ success: true, user: result.rows[0] });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
 });
 
-// 5. ውርርድ መመዝገቢያ (Place Bet) API
-app.post('/api/bets/place', async (req, res) => {
-  const client = await pool.connect();
-  try {
+// 2. Place Bet Endpoint
+app.post('/api/bets', async (req, res) => {
     const { userId, matchId, selectedOption, stakeAmount, oddsValue } = req.body;
 
-    await client.query('BEGIN');
-
-    // ሀ. የተጠቃሚውን ቀሪ ሂሳብ ማረጋገጥ
-    const userRes = await client.query('SELECT wallet_balance FROM users WHERE id = $1 FOR UPDATE', [userId]);
-    if (userRes.rows.length === 0) {
-      throw new Error('User not found');
+    if (!userId || !matchId || !selectedOption || !stakeAmount || !oddsValue) {
+        return res.status(400).json({ error: 'Missing required bet information.' });
     }
 
-    const currentBalance = parseFloat(userRes.rows[0].wallet_balance);
-    if (currentBalance < stakeAmount) {
-      throw new Error('Insufficient balance');
+    const potentialPayout = (stakeAmount * oddsValue).toFixed(2);
+
+    try {
+        const query = `
+            INSERT INTO bets (user_id, match_id, selected_option, stake_amount, odds_value, potential_payout)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *;
+        `;
+        const values = [userId, matchId, selectedOption, stakeAmount, oddsValue, potentialPayout];
+        const result = await db.query(query, values);
+
+        res.status(201).json({
+            message: 'Bet placed successfully!',
+            bet: result.rows[0]
+        });
+    } catch (err) {
+        console.error('Error saving bet:', err);
+        res.status(500).json({ error: 'Internal server error while placing bet.' });
     }
-
-    // ለ. የገንዘብ መጠን መቀነስ
-    const newBalance = currentBalance - stakeAmount;
-    await client.query('UPDATE users SET wallet_balance = $1 WHERE id = $2', [newBalance, userId]);
-
-    // ሐ. ውርርዱን መመዝገብ
-    const potentialPayout = stakeAmount * oddsValue;
-    const betRes = await client.query(
-      `INSERT INTO bets (user_id, match_id, selected_option, stake_amount, odds_value, potential_payout) 
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [userId, matchId, selectedOption, stakeAmount, oddsValue, potentialPayout]
-    );
-
-    await client.query('COMMIT');
-    res.json({ success: true, bet: betRes.rows[0], newBalance });
-  } catch (error) {
-    await client.query('ROLLBACK');
-    res.status(400).json({ success: false, error: error.message });
-  } finally {
-    client.release();
-  }
 });
 
-const PORT = process.env.PORT || 5000;
+// Serve Frontend
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
