@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArenaBets | Live Sports</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #12181f; color: #fff; margin: 0; padding: 0; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #0b0e13; border-bottom: 1px solid #2c3a4a; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #00e676; }
+    .user-wallet { background: #1e2732; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; }
+    .container { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    .match-card { background: #1e2732; padding: 1.2rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2c3a4a; margin-bottom: 1rem; }
+    .match-teams { font-weight: 600; font-size: 1.1rem; }
+    .odds-group { display: flex; gap: 0.5rem; }
+    .odds-btn { background: #2a3544; color: #fff; border: 1px solid #2c3a4a; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; text-align: center; }
+    .odds-btn:hover { background: #00e676; color: #000; }
+    .betslip-panel { background: #1e2732; padding: 1.5rem; border-radius: 8px; border: 1px solid #2c3a4a; height: fit-content; }
+    .input-group input { width: 100%; padding: 0.6rem; border-radius: 4px; border: 1px solid #2c3a4a; background: #12181f; color: #fff; margin-top: 0.3rem; }
+    .btn-primary { width: 100%; background: #00e676; color: #000; font-weight: bold; padding: 0.8rem; border: none; border-radius: 6px; cursor: pointer; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">⚡ ArenaBets</div>
+    <div class="user-wallet">
+      <span>Wallet:</span>
+      <strong id="user-balance">$0.00</strong>
+    </div>
+  </header>
+
+  <main class="container">
+    <section>
+      <h2>🔥 Popular Matches</h2>
+      <div id="matches-grid">Loading matches...</div>
+    </section>
+
+    <aside class="betslip-panel">
+      <h3>🎟️ Bet Slip</h3>
+      <div id="betslip-content">Select an outcome to place a bet.</div>
+
+      <div id="betslip-actions" style="display: none;">
+        <p><strong id="slip-match"></strong></p>
+        <p>Pick: <span id="slip-pick"></span> | Odds: <strong id="slip-odds"></strong></p>
+        <div class="input-group">
+          <label>Stake ($):</label>
+          <input type="number" id="stake-input" value="10" min="1" oninput="updatePayout()" />
+        </div>
+        <p style="margin-top: 10px;">Est. Payout: <strong id="potential-payout" style="color: #00e676;">$0.00</strong></p>
+        <button class="btn-primary" onclick="submitBet()">Place Bet Now</button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let currentBet = null;
+    let userBalance = 0;
+
+    async function loadData() {
+      // Load user balance
+      const userRes = await fetch('/api/user/1');
+      const userData = await userRes.json();
+      if (userData.success) {
+        userBalance = parseFloat(userData.user.wallet_balance);
+        document.getElementById('user-balance').innerText = `$${userBalance.toFixed(2)}`;
+      }
+
+      // Load matches
+      const matchRes = await fetch('/api/matches');
+      const matchData = await matchRes.json();
+      if (matchData.success) {
+        const grid = document.getElementById('matches-grid');
+        grid.innerHTML = '';
+        matchData.matches.forEach(m => {
+          grid.innerHTML += `
+            <div class="match-card">
+              <div class="match-teams">${m.home_team} vs ${m.away_team}</div>
+              <div class="odds-group">
+                <button class="odds-btn" onclick="selectBet(${m.id}, '${m.home_team} vs ${m.away_team}', 'HOME', ${m.home_odds})">1<br><small>${m.home_odds}</small></button>
+                <button class="odds-btn" onclick="selectBet(${m.id}, '${m.home_team} vs ${m.away_team}', 'DRAW', ${m.draw_odds})">X<br><small>${m.draw_odds}</small></button>
+                <button class="odds-btn" onclick="selectBet(${m.id}, '${m.home_team} vs ${m.away_team}', 'AWAY', ${m.away_odds})">2<br><small>${m.away_odds}</small></button>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function selectBet(matchId, matchName, option, odds) {
+      currentBet = { matchId, matchName, option, odds };
+      document.getElementById('betslip-content').style.display = 'none';
+      document.getElementById('betslip-actions').style.display = 'block';
+      document.getElementById('slip-match').innerText = matchName;
+      document.getElementById('slip-pick').innerText = option;
+      document.getElementById('slip-odds').innerText = odds;
+      updatePayout();
+    }
+
+    function updatePayout() {
+      if (!currentBet) return;
+      const stake = parseFloat(document.getElementById('stake-input').value) || 0;
+      document.getElementById('potential-payout').innerText = `$${(stake * currentBet.odds).toFixed(2)}`;
+    }
+
+    async function submitBet() {
+      if (!currentBet) return;
+      const stakeAmount = parseFloat(document.getElementById('stake-input').value);
+      
+      const res = await fetch('/api/bets/place', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 1,
+          matchId: currentBet.matchId,
+          selectedOption: currentBet.option,
+          stakeAmount,
+          oddsValue: currentBet.odds
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert('🎉 Bet Placed Successfully!');
+        location.reload();
+      } else {
+        alert(`⚠️ Failed: ${data.error}`);
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
