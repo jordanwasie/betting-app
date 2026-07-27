@@ -1,0 +1,271 @@
+:root {
+    --bg-dark: #0e1e2d;
+    --bg-card: #172b3c;
+    --bg-card-hover: #1f374d;
+    --primary-blue: #1877f2;
+    --accent-green: #28a745;
+    --accent-yellow: #f39c12;
+    --text-white: #ffffff;
+    --text-muted: #8ba2b5;
+    --border-color: #233a4e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #0b1723;
+    padding: 12px 24px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.logo span {
+    color: var(--text-white);
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.nav-links a.active, .nav-links a:hover {
+    color: var(--text-white);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.wallet {
+    background: #132435;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: var(--accent-yellow);
+}
+
+.btn-deposit {
+    background: var(--accent-green);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* 3-Column Layout */
+.main-container {
+    display: grid;
+    grid-template-columns: 240px 1fr 300px;
+    gap: 15px;
+    padding: 15px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Left Sidebar */
+.left-sidebar {
+    background: var(--bg-card);
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.left-sidebar h3 {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.sports-list {
+    list-style: none;
+}
+
+.sports-list li {
+    padding: 10px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+}
+
+.sports-list li.active, .sports-list li:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-white);
+}
+
+/* Center Content */
+.center-content {
+    background: var(--bg-card);
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.matches-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.odds-header-row {
+    display: flex;
+    justify-content: space-between;
+    background: #112232;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.odds-titles {
+    display: flex;
+    gap: 30px;
+}
+
+/* Match Item */
+.match-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #132435;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.teams-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.odds-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.odds-btn {
+    background: #1b334a;
+    color: var(--text-white);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    transition: 0.2s;
+}
+
+.odds-btn:hover, .odds-btn.selected {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.odds-label {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* Right Sidebar (Bet Slip) */
+.right-sidebar {
+    background: var(--bg-card);
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.betslip-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.empty-slip {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px 10px;
+}
+
+.bet-details {
+    background: #132435;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.highlight-odds {
+    color: var(--accent-yellow);
+    font-weight: bold;
+}
+
+.stake-input-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.stake-input-group input {
+    width: 100px;
+    padding: 6px;
+    background: #112232;
+    border: 1px solid var(--border-color);
+    color: white;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.payout-info {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: var(--accent-green);
+}
+
+.btn-place-bet {
+    width: 100%;
+    background: var(--accent-green);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+}
