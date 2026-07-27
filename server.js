@@ -6,14 +6,21 @@ const db = require('./db');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Key Config
 const ODDS_API_KEY = '8bcec2249c795c2c5e6638230386b274';
 
-// 1. Get Live Matches & Odds from The Odds API
+// Backup / Sample Matches if API is empty or fails
+const fallbackMatches = [
+    { id: "m1", home_team: "Arsenal", away_team: "Chelsea", home_odds: 1.85, draw_odds: 3.40, away_odds: 4.20 },
+    { id: "m2", home_team: "Real Madrid", away_team: "Barcelona", home_odds: 2.10, draw_odds: 3.20, away_odds: 2.95 },
+    { id: "m3", home_team: "Manchester City", away_team: "Liverpool", home_odds: 1.95, draw_odds: 3.50, away_odds: 3.80 },
+    { id: "m4", home_team: "Bayern Munich", away_team: "Dortmund", home_odds: 1.65, draw_odds: 4.00, away_odds: 5.10 },
+    { id: "m5", home_team: "PSG", away_team: "Marseille", home_odds: 1.50, draw_odds: 4.50, away_odds: 6.00 }
+];
+
+// 1. Get Live Matches API Endpoint
 app.get('/api/matches', async (req, res) => {
     try {
         const response = await axios.get('https://api.the-odds-api.com/v4/sports/soccer_epl/odds/', {
@@ -22,41 +29,45 @@ app.get('/api/matches', async (req, res) => {
                 regions: 'uk',
                 markets: 'h2h',
                 oddsFormat: 'decimal'
-            }
+            },
+            timeout: 4000 // 4 seconds timeout
         });
 
-        // Format data for our frontend
-        const matches = response.data.map(match => {
-            const bookmaker = match.bookmakers[0];
-            const market = bookmaker ? bookmaker.markets.find(m => m.key === 'h2h') : null;
-            
-            let homeOdds = 2.10, drawOdds = 3.20, awayOdds = 2.80;
+        if (response.data && response.data.length > 0) {
+            const matches = response.data.map(match => {
+                const bookmaker = match.bookmakers[0];
+                const market = bookmaker ? bookmaker.markets.find(m => m.key === 'h2h') : null;
+                
+                let homeOdds = 2.10, drawOdds = 3.20, awayOdds = 2.80;
 
-            if (market && market.outcomes) {
-                const homeOutcome = market.outcomes.find(o => o.name === match.home_team);
-                const awayOutcome = market.outcomes.find(o => o.name === match.away_team);
-                const drawOutcome = market.outcomes.find(o => o.name === 'Draw');
+                if (market && market.outcomes) {
+                    const homeOutcome = market.outcomes.find(o => o.name === match.home_team);
+                    const awayOutcome = market.outcomes.find(o => o.name === match.away_team);
+                    const drawOutcome = market.outcomes.find(o => o.name === 'Draw');
 
-                if (homeOutcome) homeOdds = homeOutcome.price;
-                if (awayOutcome) awayOdds = awayOutcome.price;
-                if (drawOutcome) drawOdds = drawOutcome.price;
-            }
+                    if (homeOutcome) homeOdds = homeOutcome.price;
+                    if (awayOutcome) awayOdds = awayOutcome.price;
+                    if (drawOutcome) drawOdds = drawOutcome.price;
+                }
 
-            return {
-                id: match.id,
-                home_team: match.home_team,
-                away_team: match.away_team,
-                commence_time: match.commence_time,
-                home_odds: homeOdds,
-                draw_odds: drawOdds,
-                away_odds: awayOdds
-            };
-        });
+                return {
+                    id: match.id,
+                    home_team: match.home_team,
+                    away_team: match.away_team,
+                    home_odds: homeOdds,
+                    draw_odds: drawOdds,
+                    away_odds: awayOdds
+                };
+            });
+            return res.json(matches);
+        } else {
+            // Return fallback matches if API returns empty array
+            return res.json(fallbackMatches);
+        }
 
-        res.json(matches);
     } catch (error) {
-        console.error('Error fetching live sports data:', error.message);
-        res.status(500).json({ error: 'Failed to fetch live matches' });
+        console.log('Using Fallback Matches due to API response/timeout.');
+        return res.json(fallbackMatches);
     }
 });
 
@@ -89,7 +100,6 @@ app.post('/api/bets', async (req, res) => {
     }
 });
 
-// Serve Frontend
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
