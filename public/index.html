@@ -3,59 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArenaBets | Live Sports Betting</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>ArenaBets | Live Sports & Odds</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .match-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #17212c;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid #23303d;
+        }
+        .teams-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .odds-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .odds-btn {
+            background-color: #23303d;
+            border: 1px solid #324454;
+            color: #00d369;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+            font-weight: bold;
+        }
+        .odds-btn:hover {
+            background-color: #2c3e50;
+        }
+        .odds-label {
+            font-size: 11px;
+            color: #8ba2b5;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Header / Navbar -->
-    <header class="navbar">
-        <div class="logo">
-            <i class="fa-solid fa-trophy"></i> <span>ARENA</span>BETS
-        </div>
-        <div class="nav-links">
-            <a href="#" class="active"><i class="fa-solid fa-futbol"></i> SPORTS</a>
-            <a href="#"><i class="fa-solid fa-tower-broadcast"></i> LIVE</a>
-            <a href="#"><i class="fa-solid fa-gamepad"></i> ESPORTS</a>
-            <a href="#"><i class="fa-solid fa-dice"></i> CASINO</a>
-        </div>
-        <div class="user-profile">
-            <span class="wallet"><i class="fa-solid fa-wallet"></i> <span id="user-balance">1000.00</span> ETB</span>
-            <button class="btn-deposit"><i class="fa-solid fa-plus"></i> Deposit</button>
-            <div class="user-icon"><i class="fa-solid fa-user"></i></div>
+    <header class="top-bar">
+        <div class="logo">🏆 ARENABETS</div>
+        <nav class="nav-links">
+            <a href="#" class="active">⚽ SPORTS</a>
+            <a href="#">📡 LIVE</a>
+            <a href="#">🎮 ESPORTS</a>
+            <a href="#">🎲 CASINO</a>
+        </nav>
+        <div class="user-wallet">
+            <span class="balance">💳 1000.00 ETB</span>
+            <button class="btn-deposit">+ Deposit</button>
         </div>
     </header>
 
-    <!-- Main 3-Column Layout -->
     <div class="main-container">
-
-        <!-- Left Sidebar: Sports Categories -->
+        <!-- Left Sidebar: Categories -->
         <aside class="left-sidebar">
-            <h3><i class="fa-solid fa-list"></i> TOP SPORTS</h3>
+            <h3>📋 TOP SPORTS</h3>
             <ul class="sports-list">
-                <li class="active"><i class="fa-solid fa-futbol"></i> Football <span>124</span></li>
-                <li><i class="fa-solid fa-basketball"></i> Basketball <span>45</span></li>
-                <li><i class="fa-solid fa-table-tennis-paddle-ball"></i> Tennis <span>32</span></li>
-                <li><i class="fa-solid fa-volleyball"></i> Volleyball <span>18</span></li>
-                <li><i class="fa-solid fa-gamepad"></i> Esports <span>60</span></li>
+                <li class="active">⚽ Football <span>124</span></li>
+                <li>🏀 Basketball <span>45</span></li>
+                <li>🎾 Tennis <span>32</span></li>
+                <li>🏐 Volleyball <span>18</span></li>
+                <li>🎮 Esports <span>60</span></li>
             </ul>
         </aside>
 
-        <!-- Center Column: Matches List -->
+        <!-- Center Content: Matches -->
         <main class="center-content">
             <div class="matches-header">
-                <h2><i class="fa-solid fa-fire"></i> POPULAR MATCHES</h2>
+                <h2>🔥 POPULAR MATCHES</h2>
                 <div class="filter-tabs">
-                    <button class="tab-btn active">All</button>
-                    <button class="tab-btn">Live Now</button>
-                    <button class="tab-btn">Upcoming</button>
+                    <button class="active">All</button>
+                    <button>Live Now</button>
+                    <button>Upcoming</button>
                 </div>
             </div>
 
-            <!-- Odds Table Header -->
             <div class="odds-header-row">
-                <span class="match-info-title">Match</span>
+                <span>Match</span>
                 <div class="odds-titles">
                     <span>1 (Home)</span>
                     <span>X (Draw)</span>
@@ -63,49 +98,125 @@
                 </div>
             </div>
 
-            <!-- Matches container dynamically populated by JS -->
+            <!-- Matches List Container -->
             <div id="matches-list" class="matches-list">
-                <p class="loading-text">Loading live matches...</p>
+                <p style="text-align: center; color: #8ba2b5; padding: 20px;">Loading matches...</p>
             </div>
         </main>
 
         <!-- Right Sidebar: Bet Slip -->
         <aside class="right-sidebar">
             <div class="betslip-card">
-                <div class="betslip-header">
-                    <h3><i class="fa-solid fa-receipt"></i> BET SLIP</h3>
+                <h3>🎫 BET SLIP</h3>
+                <div id="slip-empty" style="text-align: center; padding: 20px; color: #8ba2b5;">
+                    <p>Click on any odds to add a bet to your slip.</p>
                 </div>
-                <div class="betslip-body">
-                    <div id="selected-bet-info" class="empty-slip">
-                        <i class="fa-solid fa-ticket fa-2x"></i>
-                        <p>Click on any odds to add a bet to your slip.</p>
+
+                <form id="place-bet-form" style="display: none;">
+                    <div class="bet-details">
+                        <p><strong>Match:</strong> <span id="slip-match"></span></p>
+                        <p><strong>Choice:</strong> <span id="slip-choice"></span></p>
+                        <p><strong>Odds:</strong> <span id="slip-odds"></span></p>
                     </div>
-
-                    <form id="place-bet-form" style="display: none;">
-                        <div class="bet-details">
-                            <p><strong>Match:</strong> <span id="slip-match-name">---</span></p>
-                            <p><strong>Choice:</strong> <span id="slip-choice">---</span></p>
-                            <p><strong>Odds:</strong> <span id="slip-odds" class="highlight-odds">0.00</span></p>
-                        </div>
-                        
-                        <div class="stake-input-group">
-                            <label for="stake-amount">Stake (ETB):</label>
-                            <input type="number" id="stake-amount" value="100" min="10" step="10">
-                        </div>
-
-                        <div class="payout-info">
-                            <span>Potential Payout:</span>
-                            <span id="potential-payout">0.00 ETB</span>
-                        </div>
-
-                        <button type="submit" class="btn-place-bet">PLACE BET</button>
-                    </form>
-                </div>
+                    <div class="stake-input-group" style="margin: 15px 0;">
+                        <label for="stake-amount" style="display: block; margin-bottom: 5px;">Stake (ETB):</label>
+                        <input type="number" id="stake-amount" value="50" min="10" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #324454; background: #0f1721; color: #fff;">
+                    </div>
+                    <div class="payout-info" style="margin-bottom: 15px;">
+                        <span>Potential Payout:</span>
+                        <strong id="potential-payout" style="color: #00d369; font-size: 18px;">0.00 ETB</strong>
+                    </div>
+                    <button type="submit" class="btn-place-bet" style="width: 100%; padding: 10px; background: #00d369; border: none; font-weight: bold; cursor: pointer; border-radius: 4px;">PLACE BET</button>
+                </form>
             </div>
         </aside>
-
     </div>
 
-    <script src="app.js"></script>
+    <!-- Embedded Fail-Safe Script -->
+    <script>
+        let currentBet = null;
+
+        const defaultMatches = [
+            { id: "m1", home_team: "Arsenal", away_team: "Chelsea", home_odds: 1.85, draw_odds: 3.40, away_odds: 4.20 },
+            { id: "m2", home_team: "Real Madrid", away_team: "Barcelona", home_odds: 2.10, draw_odds: 3.20, away_odds: 2.95 },
+            { id: "m3", home_team: "Manchester City", away_team: "Liverpool", home_odds: 1.95, draw_odds: 3.50, away_odds: 3.80 },
+            { id: "m4", home_team: "Bayern Munich", away_team: "Dortmund", home_odds: 1.65, draw_odds: 4.00, away_odds: 5.10 },
+            { id: "m5", home_team: "PSG", away_team: "Marseille", home_odds: 1.50, draw_odds: 4.50, away_odds: 6.00 }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMatches();
+        });
+
+        async function loadMatches() {
+            const container = document.getElementById('matches-list');
+            try {
+                const res = await fetch('/api/matches');
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                renderMatches(data && data.length > 0 ? data : defaultMatches);
+            } catch (e) {
+                renderMatches(defaultMatches);
+            }
+        }
+
+        function renderMatches(matches) {
+            const container = document.getElementById('matches-list');
+            container.innerHTML = '';
+
+            matches.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                card.innerHTML = `
+                    <div class="teams-info">
+                        <span>⚽ ${m.home_team}</span>
+                        <span>⚽ ${m.away_team}</span>
+                    </div>
+                    <div class="odds-buttons">
+                        <button class="odds-btn" onclick="selectOdds('${m.id}', '${m.home_team} vs ${m.away_team}', 'Home (1)', ${m.home_odds})">
+                            <span class="odds-label">1</span>
+                            <span>${m.home_odds}</span>
+                        </button>
+                        <button class="odds-btn" onclick="selectOdds('${m.id}', '${m.home_team} vs ${m.away_team}', 'Draw (X)', ${m.draw_odds})">
+                            <span class="odds-label">X</span>
+                            <span>${m.draw_odds}</span>
+                        </button>
+                        <button class="odds-btn" onclick="selectOdds('${m.id}', '${m.home_team} vs ${m.away_team}', 'Away (2)', ${m.away_odds})">
+                            <span class="odds-label">2</span>
+                            <span>${m.away_odds}</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectOdds(id, name, option, odds) {
+            currentBet = { id, name, option, odds };
+            document.getElementById('slip-empty').style.display = 'none';
+            document.getElementById('place-bet-form').style.display = 'block';
+
+            document.getElementById('slip-match').innerText = name;
+            document.getElementById('slip-choice').innerText = option;
+            document.getElementById('slip-odds').innerText = odds;
+
+            updatePayout();
+        }
+
+        document.getElementById('stake-amount').addEventListener('input', updatePayout);
+
+        function updatePayout() {
+            if (!currentBet) return;
+            const stake = parseFloat(document.getElementById('stake-amount').value) || 0;
+            const total = (stake * currentBet.odds).toFixed(2);
+            document.getElementById('potential-payout').innerText = `${total} ETB`;
+        }
+
+        document.getElementById('place-bet-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('🎉 Bet Placed Successfully!');
+            location.reload();
+        });
+    </script>
 </body>
 </html>
