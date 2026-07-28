@@ -3,220 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArenaBets | Live Sports & Odds</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>ArenaBets | Sports, Keno & Aviator</title>
     <style>
-        .match-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #17212c;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            border: 1px solid #23303d;
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
         }
-        .teams-info {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-        .odds-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .odds-btn {
-            background-color: #23303d;
-            border: 1px solid #324454;
-            color: #00d369;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 60px;
-            font-weight: bold;
-        }
-        .odds-btn:hover {
-            background-color: #2c3e50;
-        }
-        .odds-label {
-            font-size: 11px;
-            color: #8ba2b5;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Navbar */
+        header { background: #0b0f19; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+        .logo { font-size: 22px; font-weight: bold; color: var(--accent); }
+        .nav-links button { background: none; border: none; color: var(--text); font-size: 16px; margin: 0 10px; cursor: pointer; padding: 8px 12px; border-radius: 5px; }
+        .nav-links button.active, .nav-links button:hover { background: var(--accent); color: white; }
+        .balance-box { background: #1e293b; padding: 8px 15px; border-radius: 20px; border: 1px solid var(--green); color: var(--green); font-weight: bold; }
+
+        /* Main Layout */
+        .container { display: flex; flex: 1; padding: 20px; gap: 20px; }
+        .main-content { flex: 3; }
+        .sidebar { flex: 1; background: var(--card-bg); border-radius: 10px; padding: 15px; height: fit-content; }
+
+        /* Game Sections */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Sports Table */
+        .match-card { background: var(--card-bg); border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
+        .match-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--yellow); margin-bottom: 10px; }
+        .match-teams { font-size: 16px; font-weight: bold; margin-bottom: 12px; }
+        .odds-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; text-align: center; }
+        .odd-btn { background: #334155; border: none; padding: 8px; border-radius: 5px; color: white; cursor: pointer; font-size: 12px; }
+        .odd-btn:hover { background: var(--accent); }
+        .odd-btn span { display: block; font-weight: bold; color: var(--green); margin-top: 3px; }
+
+        /* Keno UI */
+        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-top: 15px; }
+        .keno-num { background: #334155; padding: 15px; text-align: center; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .keno-num.selected { background: var(--yellow); color: black; }
+
+        /* Aviator UI */
+        .aviator-screen { background: #000; height: 250px; border-radius: 10px; display: flex; justify-content: center; align-items: center; flex-direction: column; position: relative; border: 2px solid #ef4444; }
+        .multiplier { font-size: 48px; font-weight: bold; color: #ef4444; }
+
+        /* Bet Slip */
+        .bet-slip h3 { border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 10px; }
+        .slip-item { background: #0f172a; padding: 10px; border-radius: 5px; margin-bottom: 8px; font-size: 13px; }
+        .btn-place-bet { width: 100%; background: var(--green); border: none; padding: 12px; color: white; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <header class="top-bar">
-        <div class="logo">🏆 ARENABETS</div>
-        <nav class="nav-links">
-            <a href="#" class="active">⚽ SPORTS</a>
-            <a href="#">📡 LIVE</a>
-            <a href="#">🎮 ESPORTS</a>
-            <a href="#">🎲 CASINO</a>
-        </nav>
-        <div class="user-wallet">
-            <span class="balance">💳 1000.00 ETB</span>
-            <button class="btn-deposit">+ Deposit</button>
+    <header>
+        <div class="logo">⚡ ArenaBets</div>
+        <div class="nav-links">
+            <button class="active" onclick="switchTab('sports')">⚽ Sports</button>
+            <button onclick="switchTab('keno')">🔢 Keno</button>
+            <button onclick="switchTab('aviator')">🚀 Aviator</button>
         </div>
+        <div class="balance-box">1000.00 ETB</div>
     </header>
 
-    <div class="main-container">
-        <!-- Left Sidebar: Categories -->
-        <aside class="left-sidebar">
-            <h3>📋 TOP SPORTS</h3>
-            <ul class="sports-list">
-                <li class="active">⚽ Football <span>124</span></li>
-                <li>🏀 Basketball <span>45</span></li>
-                <li>🎾 Tennis <span>32</span></li>
-                <li>🏐 Volleyball <span>18</span></li>
-                <li>🎮 Esports <span>60</span></li>
-            </ul>
-        </aside>
-
-        <!-- Center Content: Matches -->
-        <main class="center-content">
-            <div class="matches-header">
-                <h2>🔥 POPULAR MATCHES</h2>
-                <div class="filter-tabs">
-                    <button class="active">All</button>
-                    <button>Live Now</button>
-                    <button>Upcoming</button>
+    <div class="container">
+        <div class="main-content">
+            
+            <!-- SPORTS SECTION -->
+            <div id="sports" class="tab-content active">
+                <h2>Live & Upcoming Matches</h2>
+                <br>
+                <div id="matches-list">
+                    <!-- Matches populated dynamically -->
                 </div>
             </div>
 
-            <div class="odds-header-row">
-                <span>Match</span>
-                <div class="odds-titles">
-                    <span>1 (Home)</span>
-                    <span>X (Draw)</span>
-                    <span>2 (Away)</span>
+            <!-- KENO SECTION -->
+            <div id="keno" class="tab-content">
+                <h2>Keno 80 Game</h2>
+                <p style="color: var(--text-muted);">Select up to 10 numbers</p>
+                <div class="keno-grid" id="keno-board"></div>
+            </div>
+
+            <!-- AVIATOR SECTION -->
+            <div id="aviator" class="tab-content">
+                <h2>Aviator Crash Game</h2>
+                <br>
+                <div class="aviator-screen">
+                    <div class="multiplier" id="multiplier">1.00x</div>
+                    <p style="color: var(--text-muted); margin-top: 10px;">Plane is waiting for next round...</p>
                 </div>
             </div>
 
-            <!-- Matches List Container -->
-            <div id="matches-list" class="matches-list">
-                <p style="text-align: center; color: #8ba2b5; padding: 20px;">Loading matches...</p>
-            </div>
-        </main>
+        </div>
 
-        <!-- Right Sidebar: Bet Slip -->
-        <aside class="right-sidebar">
-            <div class="betslip-card">
-                <h3>🎫 BET SLIP</h3>
-                <div id="slip-empty" style="text-align: center; padding: 20px; color: #8ba2b5;">
-                    <p>Click on any odds to add a bet to your slip.</p>
-                </div>
-
-                <form id="place-bet-form" style="display: none;">
-                    <div class="bet-details">
-                        <p><strong>Match:</strong> <span id="slip-match"></span></p>
-                        <p><strong>Choice:</strong> <span id="slip-choice"></span></p>
-                        <p><strong>Odds:</strong> <span id="slip-odds"></span></p>
-                    </div>
-                    <div class="stake-input-group" style="margin: 15px 0;">
-                        <label for="stake-amount" style="display: block; margin-bottom: 5px;">Stake (ETB):</label>
-                        <input type="number" id="stake-amount" value="50" min="10" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #324454; background: #0f1721; color: #fff;">
-                    </div>
-                    <div class="payout-info" style="margin-bottom: 15px;">
-                        <span>Potential Payout:</span>
-                        <strong id="potential-payout" style="color: #00d369; font-size: 18px;">0.00 ETB</strong>
-                    </div>
-                    <button type="submit" class="btn-place-bet" style="width: 100%; padding: 10px; background: #00d369; border: none; font-weight: bold; cursor: pointer; border-radius: 4px;">PLACE BET</button>
-                </form>
+        <!-- SIDEBAR (BET SLIP) -->
+        <div class="sidebar bet-slip">
+            <h3>Bet Slip</h3>
+            <div id="slip-items">
+                <p style="color: var(--text-muted); font-size: 13px;">Click on any odds to add a bet.</p>
             </div>
-        </aside>
+            <button class="btn-place-bet" onclick="alert('Bet Placed Successfully!')">PLACE BET</button>
+        </div>
     </div>
 
-    <!-- Embedded Fail-Safe Script -->
     <script>
-        let currentBet = null;
+        // Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-links button').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
 
-        const defaultMatches = [
-            { id: "m1", home_team: "Arsenal", away_team: "Chelsea", home_odds: 1.85, draw_odds: 3.40, away_odds: 4.20 },
-            { id: "m2", home_team: "Real Madrid", away_team: "Barcelona", home_odds: 2.10, draw_odds: 3.20, away_odds: 2.95 },
-            { id: "m3", home_team: "Manchester City", away_team: "Liverpool", home_odds: 1.95, draw_odds: 3.50, away_odds: 3.80 },
-            { id: "m4", home_team: "Bayern Munich", away_team: "Dortmund", home_odds: 1.65, draw_odds: 4.00, away_odds: 5.10 },
-            { id: "m5", home_team: "PSG", away_team: "Marseille", home_odds: 1.50, draw_odds: 4.50, away_odds: 6.00 }
+        // Generate Full Sports Data (With Dates, Double Chance, Odds)
+        const matches = [
+            { id: 1, time: "Today 16:00 EAT", league: "Premier League", home: "Arsenal", away: "Chelsea", odds: { "1": 1.85, "X": 3.40, "2": 4.20, "1X": 1.22, "12": 1.30, "X2": 1.95 } },
+            { id: 2, time: "Today 18:30 EAT", league: "La Liga", home: "Real Madrid", away: "Barcelona", odds: { "1": 2.10, "X": 3.20, "2": 2.95, "1X": 1.35, "12": 1.28, "X2": 1.60 } },
+            { id: 3, time: "Tomorrow 20:00 EAT", league: "Champions League", home: "Bayern Munich", away: "PSG", odds: { "1": 1.90, "X": 3.60, "2": 3.80, "1X": 1.25, "12": 1.25, "X2": 1.85 } },
+            { id: 4, time: "Tomorrow 22:00 EAT", league: "Serie A", home: "Inter Milan", away: "AC Milan", odds: { "1": 2.00, "X": 3.10, "2": 3.50, "1X": 1.28, "12": 1.33, "X2": 1.70 } }
         ];
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadMatches();
-        });
+        function renderMatches() {
+            const list = document.getElementById('matches-list');
+            list.innerHTML = matches.map(m => `
+                <div class="match-card">
+                    <div class="match-header">
+                        <span>🏆 ${m.league}</span>
+                        <span>📅 ${m.time}</span>
+                    </div>
+                    <div class="match-teams">${m.home} vs ${m.away}</div>
+                    <div class="odds-grid">
+                        <button class="odd-btn">1 <span>${m.odds['1']}</span></button>
+                        <button class="odd-btn">X <span>${m.odds['X']}</span></button>
+                        <button class="odd-btn">2 <span>${m.odds['2']}</span></button>
+                        <button class="odd-btn">1X <span>${m.odds['1X']}</span></button>
+                        <button class="odd-btn">12 <span>${m.odds['12']}</span></button>
+                        <button class="odd-btn">X2 <span>${m.odds['X2']}</span></button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-        async function loadMatches() {
-            const container = document.getElementById('matches-list');
-            try {
-                const res = await fetch('/api/matches');
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                renderMatches(data && data.length > 0 ? data : defaultMatches);
-            } catch (e) {
-                renderMatches(defaultMatches);
+        // Render Keno Board
+        function renderKeno() {
+            const board = document.getElementById('keno-board');
+            let html = '';
+            for(let i=1; i<=80; i++) {
+                html += `<div class="keno-num" onclick="this.classList.toggle('selected')">${i}</div>`;
             }
+            board.innerHTML = html;
         }
 
-        function renderMatches(matches) {
-            const container = document.getElementById('matches-list');
-            container.innerHTML = '';
+        // Aviator Animation Simulation
+        let multi = 1.00;
+        setInterval(() => {
+            multi += 0.05;
+            if(multi > 5.0) multi = 1.00;
+            document.getElementById('multiplier').innerText = multi.toFixed(2) + 'x';
+        }, 300);
 
-            matches.forEach(m => {
-                const card = document.createElement('div');
-                card.className = 'match-card';
-                card.innerHTML = `
-                    <div class="teams-info">
-                        <span>⚽ ${m.home_team}</span>
-                        <span>⚽ ${m.away_team}</span>
-                    </div>
-                    <div class="odds-buttons">
-                        <button class="odds-btn" onclick="selectOdds('${m.id}', '${m.home_team} vs ${m.away_team}', 'Home (1)', ${m.home_odds})">
-                            <span class="odds-label">1</span>
-                            <span>${m.home_odds}</span>
-                        </button>
-                        <button class="odds-btn" onclick="selectOdds('${m.id}', '${m.home_team} vs ${m.away_team}', 'Draw (X)', ${m.draw_odds})">
-                            <span class="odds-label">X</span>
-                            <span>${m.draw_odds}</span>
-                        </button>
-                        <button class="odds-btn" onclick="selectOdds('${m.id}', '${m.home_team} vs ${m.away_team}', 'Away (2)', ${m.away_odds})">
-                            <span class="odds-label">2</span>
-                            <span>${m.away_odds}</span>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function selectOdds(id, name, option, odds) {
-            currentBet = { id, name, option, odds };
-            document.getElementById('slip-empty').style.display = 'none';
-            document.getElementById('place-bet-form').style.display = 'block';
-
-            document.getElementById('slip-match').innerText = name;
-            document.getElementById('slip-choice').innerText = option;
-            document.getElementById('slip-odds').innerText = odds;
-
-            updatePayout();
-        }
-
-        document.getElementById('stake-amount').addEventListener('input', updatePayout);
-
-        function updatePayout() {
-            if (!currentBet) return;
-            const stake = parseFloat(document.getElementById('stake-amount').value) || 0;
-            const total = (stake * currentBet.odds).toFixed(2);
-            document.getElementById('potential-payout').innerText = `${total} ETB`;
-        }
-
-        document.getElementById('place-bet-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('🎉 Bet Placed Successfully!');
-            location.reload();
-        });
+        // Init
+        renderMatches();
+        renderKeno();
     </script>
 </body>
 </html>
