@@ -11,14 +11,16 @@ const {
 const app = express();
 
 app.use(express.json());
-app.use(express.static('public'));
 
-// Root route - Render/Mini App index.html ን በቀጥታ እንዲያነብ
+// Public ፎልደርን በግልጽ በ Absolute Path ማገናኘት
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Root Route - index.html ን በቀጥታ ለመላክ
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Telegram Bot Setup
+// Telegram Bot
 const bot = new Telegraf(process.env.BOT_TOKEN || '8717205197:AAEXpsXLqd7cATEMhrgUtaaF5legJgpcz8E');
 
 bot.start(handleStart);
