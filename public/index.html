@@ -3,28 +3,168 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lion Bingo Game</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Telegram WebApp SDK -->
+  <title>ጦቢያ Bingo</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      background-color: #121826;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 15px;
+    }
+    h1 {
+      color: #ff9900;
+      margin-bottom: 5px;
+    }
+    .called-number-container {
+      background: #1e293b;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 15px auto;
+      max-width: 320px;
+    }
+    .called-number {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #22c55e;
+    }
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      max-width: 330px;
+      margin: 0 auto;
+      background: #1e293b;
+      padding: 8px;
+      border-radius: 10px;
+    }
+    .grid-header {
+      font-weight: bold;
+      color: #ff9900;
+      font-size: 1.2rem;
+      padding: 8px 0;
+    }
+    .cell {
+      background: #334155;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cell.marked {
+      background: #22c55e;
+      color: #ffffff;
+    }
+    .cell.free {
+      background: #eab308;
+      color: #000;
+      font-size: 0.8rem;
+    }
+    .btn-bingo {
+      margin-top: 20px;
+      padding: 12px 40px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+    }
+    .btn-bingo:active {
+      transform: scale(0.96);
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🎰 Lion Bingo</h1>
-      <p id="user-name">እንኳን ደህና መጡ!</p>
-    </header>
 
-    <div class="card-section">
-      <h3>የእርስዎ የቢንጎ ካርድ</h3>
-      <div id="bingo-card" class="grid"></div>
-    </div>
-
-    <div class="action-section">
-      <button id="claim-btn" onclick="claimBingo()">🎉 BINGO!</button>
-    </div>
+  <h1>🎰 ጦቢያ Bingo</h1>
+  
+  <div class="called-number-container">
+    <div>የተጠራው ቁጥር:</div>
+    <div id="calledNumber" class="called-number">--</div>
   </div>
 
-  <script src="app.js"></script>
+  <div class="bingo-grid">
+    <div class="grid-header">B</div>
+    <div class="grid-header">I</div>
+    <div class="grid-header">N</div>
+    <div class="grid-header">G</div>
+    <div class="grid-header">O</div>
+    <div id="grid-cells" style="display: contents;"></div>
+  </div>
+
+  <button class="btn-bingo" onclick="claimBingo()">🎉 BINGO!</button>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) tg.expand();
+
+    const gridElement = document.getElementById('grid-cells');
+    const calledNumberElement = document.getElementById('calledNumber');
+
+    let calledNumbersHistory = [];
+
+    function generateCard() {
+      const ranges = [
+        [1, 15],   // B
+        [16, 30],  // I
+        [31, 45],  // N
+        [46, 60],  // G
+        [61, 75]   // O
+      ];
+
+      const columns = ranges.map(([min, max]) => {
+        let nums = [];
+        while (nums.length < 5) {
+          let r = Math.floor(Math.random() * (max - min + 1)) + min;
+          if (!nums.includes(r)) nums.push(r);
+        }
+        return nums;
+      });
+
+      gridElement.innerHTML = '';
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+
+          if (row === 2 && col === 2) {
+            cell.innerText = 'FREE';
+            cell.classList.add('free', 'marked');
+          } else {
+            cell.innerText = columns[col][row];
+            cell.onclick = () => cell.classList.toggle('marked');
+          }
+          gridElement.appendChild(cell);
+        }
+      }
+    }
+
+    function startCallingNumbers() {
+      setInterval(() => {
+        let randomNum = Math.floor(Math.random() * 75) + 1;
+        if (!calledNumbersHistory.includes(randomNum)) {
+          calledNumbersHistory.push(randomNum);
+          calledNumberElement.innerText = randomNum;
+        }
+      }, 4000);
+    }
+
+    function claimBingo() {
+      alert('🎉 BINGO! ውጤትዎ እየተረጋገጠ ነው...');
+    }
+
+    generateCard();
+    startCallingNumbers();
+  </script>
 </body>
 </html>
