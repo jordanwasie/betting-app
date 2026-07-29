@@ -1,34 +1,31 @@
-const { Markup } = require('telegraf');
-
-// /start command
-const handleStart = (ctx) => {
-  const instructions = 
-    `እንኳን ወደ Lion Bet / Bingo ቦት በሰላም መጡ!\n\n` +
-    `ወደ ጨዋታው ለመግባት:\n` +
-    `1. ከታች ያለውን "Share My Contact" የሚለውን ይጫኑ\n` +
-    `2. ስልክ ቁጥርዎን ከተላከ በኋላ "Play Bingo" የሚለውን ይጫኑ`;
-
-  return ctx.reply(instructions, 
-    Markup.keyboard([
-      [Markup.button.contactRequest('📱 Share My Contact')],
-      [Markup.button.webApp('🎰 Play Bingo', process.env.WEBAPP_URL || 'https://google.com')]
-    ]).resize()
-  );
-};
-
-// User Contact መቀበያ
 const handleContact = async (ctx) => {
   try {
     const phoneNumber = ctx.message.contact.phone_number;
-    const firstName = ctx.from.first_name;
+    const firstName = ctx.from.first_name || 'User';
+    const generatedPassword = generatePassword(10);
 
-    console.log(`✅ የተመዘገበ ተጠቃሚ: ${firstName} | ስልክ: ${phoneNumber}`);
+    const welcomeMsg = 
+      `🎉 Welcome, ${firstName}!\n\n` +
+      `Your account has been created.\n\n` +
+      `📱 Phone: ${phoneNumber}\n` +
+      `🔑 Password: ${generatedPassword}\n\n` +
+      `⚠️ Save this password! You'll need it to login on other devices.`;
 
-    await ctx.reply(`እናመሰግናለን ${firstName}! ስልክ ቁጥርዎ በትክክል ተመዝግቧል። አሁን "Play Bingo" የሚለውን ተጭነው መጫወት ይችላሉ።`);
+    await ctx.reply(welcomeMsg, Markup.removeKeyboard());
+
+    // ቋሚ የ Mini App Inline Button
+    const gameUrl = 'https://tobia-bingo-app.onrender.com';
+
+    return ctx.reply(`Hey ${firstName}! 👋\n\nReady to play?`, 
+      Markup.inlineKeyboard([
+        [Markup.button.webApp('🎮 Play Bingo Now', gameUrl)],
+        [Markup.button.callback('💰 Deposit', 'start_deposit')],
+        [Markup.button.callback('💲 Check Balance', 'check_balance')]
+      ])
+    );
+
   } catch (error) {
     console.error('Contact error:', error);
     await ctx.reply('ምዝገባው ላይ ስህተት አጋጥሟል፣ እባክዎ ደግመው ይሞክሩ።');
   }
 };
-
-module.exports = { handleStart, handleContact };
