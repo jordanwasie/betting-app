@@ -13,9 +13,10 @@ const handleContact = async (ctx) => {
 
     await ctx.reply(welcomeMsg, Markup.removeKeyboard());
 
-    // ቋሚ የ Mini App Inline Button
+    // ቋሚ የ Render Mini App URL
     const gameUrl = 'https://tobia-bingo-app.onrender.com';
 
+    // በቻቱ ውስጥ በቀጥታ Cache ሳይደረግ የሚከፈት Inline Button
     return ctx.reply(`Hey ${firstName}! 👋\n\nReady to play?`, 
       Markup.inlineKeyboard([
         [Markup.button.webApp('🎮 Play Bingo Now', gameUrl)],
